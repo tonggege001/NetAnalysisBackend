@@ -12,7 +12,7 @@ import (
 )
 
 const ALODOMAIN = "http://127.0.0.1:2048"
-
+//const ALODOMAIN = "http://10.15.150.82:2048"
 func GetRecommendMusicVideoCall(uid int64, fowList []int64, weiBoList[]map[string]interface{}) ([]int, error){
 	defer utils.RecoverResolve()
 	retList := make([]int,0)

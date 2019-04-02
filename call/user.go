@@ -2,12 +2,13 @@ package call
 
 import (
 	"NetAnalysisBackend/utils"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -15,30 +16,26 @@ func GetFollowingUidListByUid(uid int64, accessToken string) ([]int64,error) {
 	defer utils.RecoverResolve()
 	apiUrl := "https://api.weibo.com/2/friendships/friends/ids.json"
 	retList := make([]int64,0)
-
-	sendMap := make(map[string]interface{})
+	totalNum := 0
 	curCursor := 0
 	for {
-		sendMap["access_token"] = accessToken
-		sendMap["uid"] = uid
-		sendMap["cursor"] = curCursor
-		byteJson,err := json.Marshal(sendMap)
+		time.Sleep(time.Duration(2000)*time.Microsecond)
+		Url, err := url.Parse(apiUrl)
 		if err != nil{
-			log.Printf("GetFollowingUidListByUid Marshal sendMap=%v",sendMap)
+			log.Printf("GetFollowingUidListByUid url.Parse error, err=%v",err)
 			return retList,err
 		}
 
-		body := bytes.NewReader(byteJson)
-		client := &http.Client{}
-		request, err := http.NewRequest("GET", apiUrl, body) //建立一个请求
-		if err!= nil{
-			log.Printf("GetFollowingUidListByUid http.NewRequest error body=%v, err=%v",body,err)
-			return retList, err
-		}
-
-		response, err := client.Do(request) //提交
+		params:=url.Values{}
+		params.Set("access_token",accessToken)  //这两种都可以
+		params.Set("uid",strconv.FormatInt(uid,10))
+		params.Set("cursor",strconv.FormatInt(int64(curCursor),10))
+		Url.RawQuery = params.Encode()				//如果参数中有中文参数,这个方法会进行URLEncode
+		urlPath := Url.String()
+		response, err := http.Get(urlPath)
+		log.Printf("urlPath=%v",urlPath)
 		if err!= nil {
-			log.Printf("GetFollowingUidListByUid client.Do(request) error, err=%v",err)
+			log.Printf("GetFollowingUidListByUid http.Get(urlPath) error, err=%v",err)
 			return retList,err
 		}
 
@@ -58,24 +55,28 @@ func GetFollowingUidListByUid(uid int64, accessToken string) ([]int64,error) {
 		//判断登录态
 		if respMap["error"] != nil{
 			//登录态过期则
+			print(retList)
+			log.Printf("GetFollowingUidListByUid respMap[\"error\"], respMap=%v",respMap)
 			return retList, errors.New("not Login")
 		}
+
 		err = response.Body.Close()
 		if err != nil{
 			log.Printf("GetFollowingUidListByUid response.Body.Close() error, err=%v",err)
 			return retList,err
 		}
+
+		for _,ids := range respMap["ids"].([]interface{}){
+			retList = append(retList,(int64)(ids.(float64)))
+		}
+
+		totalNum = (int)(respMap["total_number"].(float64))
+		curCursor = curCursor+5
+
 		//跳出判断
-		if respMap["previous_cursor"].(int) == respMap["next_cursor"].(int){
+		if curCursor >= totalNum{
 			break
 		}
-
-		for _,ids := range respMap["ids"].([]int64){
-			retList = append(retList,ids)
-		}
-
-		curCursor = respMap["next_cursor"].(int)
-
 	}
 
 	return retList,nil
@@ -88,28 +89,22 @@ func GetWeiboListByUid(uid int64, accessToken string)([]map[string]interface{},e
 	retList := make([]map[string]interface{},0)
 
 	page := 1
-	sendMap := make(map[string]interface{})
 	for {
-		sendMap["access_token"] = accessToken
-		sendMap["count"] = 100
-		sendMap["page"] = 1
-		byteJson,err := json.Marshal(sendMap)
+		Url, err := url.Parse(apiUrl)
 		if err != nil{
-			log.Printf("GetWeiboListByUid Marshal sendMap=%v",sendMap)
+			log.Printf("GetFollowingUidListByUid url.Parse error, err=%v",err)
 			return retList,err
 		}
 
-		body := bytes.NewReader(byteJson)
-		client := &http.Client{}
-		request, err := http.NewRequest("GET", apiUrl, body) //建立一个请求
-		if err!= nil{
-			log.Printf("GetWeiboListByUid http.NewRequest error body=%v, err=%v",body,err)
-			return retList, err
-		}
-
-		response, err := client.Do(request) //提交
+		params:=url.Values{}
+		params.Set("access_token",accessToken)  //这两种都可以
+		params.Set("uid",strconv.FormatInt(uid,10))
+		params.Set("page",strconv.FormatInt(int64(page),10))
+		Url.RawQuery = params.Encode()				//如果参数中有中文参数,这个方法会进行URLEncode
+		urlPath := Url.String()
+		response, err := http.Get(urlPath)
 		if err!= nil {
-			log.Printf("GetWeiboListByUid client.Do(request) error, err=%v",err)
+			log.Printf("GetWeiboListByUid http.Get(urlPath) error, err=%v",err)
 			return retList,err
 		}
 
@@ -139,14 +134,15 @@ func GetWeiboListByUid(uid int64, accessToken string)([]map[string]interface{},e
 		}
 
 		//跳出判断
-		statuses := respMap["statuses"].([]map[string]interface{})
+		statuses := respMap["statuses"].([]interface{})
 		if len(statuses) == 0{
 			break
 		}else{
 			page++
 		}
 
-		for _,value := range statuses{
+		for _,_value := range statuses{
+			value := _value.(map[string]interface{})
 			weiboTime,err := time.Parse("Mon Jan 02 03:04:05 +0800 2006",value["created_at"].(string))
 			if err != nil {
 				weiboTime = time.Now()
@@ -156,6 +152,7 @@ func GetWeiboListByUid(uid int64, accessToken string)([]map[string]interface{},e
 			weiboDetail["time"] = weiboTime.Unix()
 			retList = append(retList, weiboDetail)
 		}
+		time.Sleep(time.Duration(2000)*time.Microsecond)
 	}
 
 	return retList, nil

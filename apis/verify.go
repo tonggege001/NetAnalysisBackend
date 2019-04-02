@@ -45,6 +45,7 @@ func WeiboCall(w http.ResponseWriter, r *http.Request){
 		log.Printf("WeiboCall SetRedis error, err=%v", err)
 		retMap["code"] = utils.REDISERR
 		utils.SendJson(&retMap,w)
+		return
 	}
 
 	retMap["code"] = utils.OK

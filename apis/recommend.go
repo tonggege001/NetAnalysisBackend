@@ -58,8 +58,8 @@ func GetRecommendMusicVideo(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	uidList, err := call.GetFollowingUidListByUid(uidInt64, accessToken)
-	if err!= nil{
-		log.Printf("GetRecommendMusicVideo GetFollowingUidListByUid error, err=%v",err)
+	if err != nil{
+		log.Printf("GetRecommendMusicVideo GetFollowingUidListByUid error, err=%v, uidInt64=%v, accessToken=%v",err,uidInt64,accessToken)
 		if err.Error() == "not Login"{
 			retMap["code"] = utils.NOTLOGIN
 		}else {
