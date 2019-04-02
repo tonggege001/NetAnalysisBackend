@@ -12,7 +12,7 @@ const MATHERR  = 7
 const CALLERR = 8
 const DATABASEERR  = 9
 
-const DOMAIN  = "http://dachuang123.ml/login"
+const DOMAIN  = "http://47.106.174.32:3224/login"
 //const DOMAIN  = "http://10.11.54.158:3224/login"
 
 //const APPID  = "3793321635"   default
@@ -20,3 +20,5 @@ const DOMAIN  = "http://dachuang123.ml/login"
 
 const APPID = "3251758552"
 const APPSECRET = "2b63d47759e5194d4cdd476114cd5c15"
+
+

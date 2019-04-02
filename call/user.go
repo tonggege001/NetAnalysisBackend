@@ -16,7 +16,7 @@ func GetFollowingUidListByUid(uid int64, accessToken string) ([]int64,error) {
 	defer utils.RecoverResolve()
 	apiUrl := "https://api.weibo.com/2/friendships/friends/ids.json"
 	retList := make([]int64,0)
-	totalNum := 0
+	//totalNum := 0
 	curCursor := 0
 	for {
 		time.Sleep(time.Duration(2000)*time.Microsecond)
@@ -70,13 +70,13 @@ func GetFollowingUidListByUid(uid int64, accessToken string) ([]int64,error) {
 			retList = append(retList,(int64)(ids.(float64)))
 		}
 
-		totalNum = (int)(respMap["total_number"].(float64))
+		//totalNum = (int)(respMap["total_number"].(float64))
 		curCursor = curCursor+5
 
 		//跳出判断
-		if curCursor >= totalNum{
+		//if curCursor >= totalNum{
 			break
-		}
+		//}
 	}
 
 	return retList,nil
@@ -153,6 +153,8 @@ func GetWeiboListByUid(uid int64, accessToken string)([]map[string]interface{},e
 			retList = append(retList, weiboDetail)
 		}
 		time.Sleep(time.Duration(2000)*time.Microsecond)
+		break
+
 	}
 
 	return retList, nil
