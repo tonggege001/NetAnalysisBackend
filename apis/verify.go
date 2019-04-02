@@ -216,7 +216,15 @@ func QuitLogin(w http.ResponseWriter, r *http.Request){
 	return
 }
 
+func IndexPage(w http.ResponseWriter, r *http.Request){
+	defer utils.RecoverResolve()
 
+	retMap := make(map[string]interface{})
+	retMap["code"] = 0
+	retMap["content"] = "社交网络分析应用APP"
+	retMap["desc"] = "主页暂时没有建设完成"
+	utils.SendJson(&retMap,w)
+}
 
 
 

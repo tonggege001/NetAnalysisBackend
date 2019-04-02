@@ -15,6 +15,7 @@ func main(){
 	http.HandleFunc("/login_page",apis.GetVerifiedAndUserInfo)		//用户认证登录
 	http.HandleFunc("/quit",apis.QuitLogin)							//用户认证退出
 	http.HandleFunc("/music_recommend_video",apis.GetRecommendMusicVideo)		//用户认证登录
+	http.HandleFunc("/",apis.IndexPage)								//主页
 	//http.HandleFunc("")
 	err := http.ListenAndServe(":3224", nil) 					//设置监听的端口
 	if err != nil {
