@@ -19,7 +19,6 @@ func GetFollowingUidListByUid(uid int64, accessToken string) ([]int64,error) {
 	//totalNum := 0
 	curCursor := 0
 	for {
-		time.Sleep(time.Duration(2000)*time.Microsecond)
 		Url, err := url.Parse(apiUrl)
 		if err != nil{
 			log.Printf("GetFollowingUidListByUid url.Parse error, err=%v",err)
@@ -33,7 +32,6 @@ func GetFollowingUidListByUid(uid int64, accessToken string) ([]int64,error) {
 		Url.RawQuery = params.Encode()				//如果参数中有中文参数,这个方法会进行URLEncode
 		urlPath := Url.String()
 		response, err := http.Get(urlPath)
-		log.Printf("urlPath=%v",urlPath)
 		if err!= nil {
 			log.Printf("GetFollowingUidListByUid http.Get(urlPath) error, err=%v",err)
 			return retList,err
@@ -74,9 +72,8 @@ func GetFollowingUidListByUid(uid int64, accessToken string) ([]int64,error) {
 		curCursor = curCursor+5
 
 		//跳出判断
-		//if curCursor >= totalNum{
-			break
-		//}
+		break	//只获取一次的uid（5个）
+
 	}
 
 	return retList,nil
@@ -99,7 +96,7 @@ func GetWeiboListByUid(uid int64, accessToken string)([]map[string]interface{},e
 		params:=url.Values{}
 		params.Set("access_token",accessToken)  //这两种都可以
 		params.Set("uid",strconv.FormatInt(uid,10))
-		params.Set("page",strconv.FormatInt(int64(page),10))
+		params.Set("count","100")
 		Url.RawQuery = params.Encode()				//如果参数中有中文参数,这个方法会进行URLEncode
 		urlPath := Url.String()
 		response, err := http.Get(urlPath)
@@ -137,7 +134,7 @@ func GetWeiboListByUid(uid int64, accessToken string)([]map[string]interface{},e
 		statuses := respMap["statuses"].([]interface{})
 		if len(statuses) == 0{
 			break
-		}else{
+		}else{			//page暂时不管
 			page++
 		}
 
@@ -152,7 +149,7 @@ func GetWeiboListByUid(uid int64, accessToken string)([]map[string]interface{},e
 			weiboDetail["time"] = weiboTime.Unix()
 			retList = append(retList, weiboDetail)
 		}
-		time.Sleep(time.Duration(2000)*time.Microsecond)
+		time.Sleep(time.Duration(500)*time.Microsecond)
 		break
 
 	}

@@ -14,7 +14,8 @@ func main(){
 	http.HandleFunc("/login_weibo",apis.VerifyWeibo)					//设置访问的路由
 	http.HandleFunc("/login_page",apis.GetVerifiedAndUserInfo)		//用户认证登录
 	http.HandleFunc("/quit",apis.QuitLogin)							//用户认证退出
-	http.HandleFunc("/music_recommend_video",apis.GetRecommendMusicVideo)		//用户认证登录
+	http.HandleFunc("/music_recommend_video",apis.GetRecommendMusicVideo)		//用户获得推荐音乐
+	http.HandleFunc("/music_recommend_up",apis.GetRecommendMusicUp)
 	http.HandleFunc("/",apis.IndexPage)								//主页
 	//http.HandleFunc("")
 	err := http.ListenAndServe(":3224", nil) 					//设置监听的端口
