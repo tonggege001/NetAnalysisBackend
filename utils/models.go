@@ -101,7 +101,7 @@ func GetUpMasterDataListByUpIDList(upIdList []int)([]UpMasterInfo,error)  {
 		for UpRows.Next(){
 			err = UpRows.Scan(&upData.Name)
 			if err != nil{
-				log.Printf("VerifyLogin Rows.Scan error, Rows=%v, err=%v",MetaRows,err)
+				log.Printf("VerifyLogin Rows.Scan error, Rows=%v, err=%v",UpRows,err)
 				return ret,err
 			}
 			ret = append(ret,upData)

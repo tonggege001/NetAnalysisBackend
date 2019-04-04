@@ -11,8 +11,10 @@ import (
 	"net/http"
 )
 
-const ALODOMAIN = "http://10.11.185.233:2048"
+//const ALODOMAIN = "http://47.106.174.32:2048"
 //const ALODOMAIN = "http://10.15.150.82:2048"
+const ALODOMAIN  = "http://127.0.0.1:2048"
+
 func GetRecommendMusicVideoCall(uid int64, fowList []int64, weiBoList[]map[string]interface{}) ([]int, error){
 	//defer utils.RecoverResolve()
 	defer utils.Recover2("GetRecommendMusicVideoCall")
@@ -81,7 +83,7 @@ func GetRecommendMusicUp(uid int64, fowList []int64, weiBoList[]map[string]inter
 		log.Printf("GetRecommendMusicUp Marshal sendMap=%v",sendMap)
 		return retList,err
 	}
-	log.Printf("req=\n%v",string(byteJson))
+
 	body := bytes.NewReader(byteJson)
 	client := &http.Client{}
 	request, err := http.NewRequest("POST", ALODOMAIN+"/alo/music_recommend_up", body) //建立一个请求
@@ -110,12 +112,16 @@ func GetRecommendMusicUp(uid int64, fowList []int64, weiBoList[]map[string]inter
 		return retList, err
 	}
 
-	if respMap["code"].(int) == 0{
+	if int(respMap["code"].(float64)) == 0{
 		log.Printf("GetRecommendMusicUp call get code not 0")
-		return retList,errors.New(fmt.Sprintf("getError code, code=%v",respMap["code"].(int)))
+		return retList,errors.New(fmt.Sprintf("getError code, code=%v",int(respMap["code"].(float64))))
 	}
 
-	retList = respMap["up_master"].([]int)
+	retListFloat64 := respMap["up_master"].([]interface{})
+	for _,e := range retListFloat64{
+		retList = append(retList,(int)(e.(float64)))
+	}
+
 	return retList,nil
 }
 

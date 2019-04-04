@@ -23,7 +23,7 @@ func SetRedis(key string, value string) error{
 		return errors.New(fmt.Sprintf("SetRedis c.Send error, err=%v",err))
 	}
 
-	reply, err := c.Do("set", key,value,"EX", 60*60)
+	_, err = c.Do("set", key,value,"EX", 60*60)
 	if err != nil{
 		return errors.New(fmt.Sprintf("SetToken c.Send set key error, key=%v, value=%v, err=%v",key,value,err))
 	}
@@ -49,7 +49,7 @@ func SetRedisByEx(key string, value string, ex int) error{
 		return errors.New(fmt.Sprintf("SetRedis c.Send error, err=%v",err))
 	}
 
-	reply, err := c.Do("set", key,value,"EX", ex)
+	_, err = c.Do("set", key,value,"EX", ex)
 	if err != nil{
 		return errors.New(fmt.Sprintf("SetToken c.Send set key error, key=%v, value=%v, err=%v",key,value,err))
 	}
